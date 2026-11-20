@@ -8,7 +8,7 @@ case "$MODE" in
     cat << 'JSON'
 {
   "protocol_version": "1.0",
-  "supported_tasks": ["T2", "T3", "T4", "T5"],
+  "supported_tasks": [],
   "self_trained_rl": false,
   "preferred_speed_mps": null
 }
