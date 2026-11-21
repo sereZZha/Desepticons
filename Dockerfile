@@ -4,7 +4,7 @@ SHELL ["/bin/bash", "-c"]
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-ENV GO1_MUJOCO_MODEL_DIR=/opt/mujoco_menagerie/unitree_go1
+ENV GO1_MODELS_DIR=/opt/mujoco_menagerie/unitree_go1
 
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -31,29 +31,24 @@ RUN git init /tmp/unitree_ros2 && cd /tmp/unitree_ros2 \
 WORKDIR /opt/unitree_ws
 RUN source /opt/ros/humble/setup.bash \
     && colcon build --packages-select unitree_go \
-    && rm -rf build lo
-RUN pip3 install --no-cache-dir "numpy<2" mujoco==3.3.7
+    && rm -rf build log
+COPY requirements.txt .
+RUN pip3 install --no-cache-dir -r requirements.txt
 
 
-RUN git init /tmp/menagerie && cd /tmp/menagerie \
-    && git remote add origin https://github.com/google-deepmind/mujoco_menagerie.git \
-    && git sparse-checkout set unitree_go1 \
-    && git fetch --depth 1 origin main \
-    && git checkout FETCH_HEAD \
-    && mkdir -p /opt/mujoco_menagerie \
-    && mv unitree_go1 /opt/mujoco_menagerie/unitree_go1 \
-    && rm -rf /tmp/menagerie
+COPY models/unitree_go1/ /opt/mujoco_menagerie/unitree_go1/
 
 
 RUN source /opt/ros/humble/setup.bash \
     && source /opt/unitree_ws/install/setup.bash \
-    && python3 -c "from unitree_go.msg import LowCmd, LowState; import mujoco; m = mujoco.MjModel.from_xml_path('/opt/mujoco_menagerie/unitree_go1/go1.xml'); assert m.nu == 12"
+    && python3 -c "from unitree_go.msg import LowCmd, LowState; import mujoco; m = mujoco.MjModel.from_xml_path('/opt/mujoco_menagerie/unitree_go1/scene.xml'); assert m.nu == 12"
 
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod 755 /entrypoint.sh
 
 RUN useradd -m -s /bin/bash participant
+COPY safety_block.py /home/participant/safety_block.py
 USER participant
 WORKDIR /home/participant
 
