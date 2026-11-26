@@ -49,6 +49,7 @@ RUN chmod 755 /entrypoint.sh
 
 RUN useradd -m -s /bin/bash participant
 COPY safety_block.py /home/participant/safety_block.py
+COPY odom_node.py /home/participant/odom_node.py
 USER participant
 WORKDIR /home/participant
 

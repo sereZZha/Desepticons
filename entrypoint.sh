@@ -8,7 +8,7 @@ case "$MODE" in
     cat << 'JSON'
 {
   "protocol_version": "1.0",
-  "supported_tasks": ["T2"],
+  "supported_tasks": ["T2", "T4"],
   "self_trained_rl": false,
   "preferred_speed_mps": null
 }
@@ -22,7 +22,14 @@ JSON
     echo "Starting task T2..." >&2
     exec python3 /home/participant/safety_block.py
     ;;
-  T3|T4|T5)
+  T4)
+    source /opt/ros/humble/setup.bash
+    source /opt/unitree_ws/install/setup.bash
+    export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+    echo "Starting task T4..." >&2
+    exec python3 /home/participant/odom_node.py --ros-args -p use_sim_time:=true
+    ;;
+  T3|T5)
     source /opt/ros/humble/setup.bash
     source /opt/unitree_ws/install/setup.bash
     export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
